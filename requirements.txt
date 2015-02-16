@@ -1,0 +1,7 @@
+setuptools
+bottle
+bottle-sqlite
+CherryPy
+coverage
+nose
+mockito-without-hardcoded-distribute-version
