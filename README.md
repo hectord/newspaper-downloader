@@ -1,6 +1,10 @@
 # NewspaperDownloader
 
-ND is a web site that unifies the way you download your newspapers. It is made up of a worker, downlading every new issue as it comes out, and a web server to download all of them in one click.
+ND is a web site that unifies the way you download your newspapers.
+
+![website example](/pictures/website_example.png?raw=true "What your website could look like")
+
+It is made up of a worker, downlading every new issue as it comes out, and a web server to download all of them in one click.
 
 I have developed two plugins to download my (swiss) newspapers:
  * 24 heures
