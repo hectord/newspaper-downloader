@@ -1,12 +1,12 @@
 # NewspaperDownloader
 
-ND is a web site that unifies the way you download your newspapers. It is made up of a worker, downloading every new issue as it comes out, and a web server to download all of them in one click.
+ND is a web site that unifies the way you download your newspapers. It is made up of a worker, downlading every new issue as it comes out, and a web server to download all of them in one click.
 
 I have developed two plugins to download my (swiss) newspapers:
  * 24 heures
  * Le Temps
 
-You can use them if you have a valid subscription. Otherwise, you can develop a new plugin to download your own newspaper on the platform.
+You can use them if you have a valid subscription. Otherwise you can develop a new plugin to download your own newspaper on the platform.
 
 Please, don't ask me my credentials to download my newspapers. I use this application to promote newspapers not to steal them.
 
@@ -29,7 +29,7 @@ If you want to be aware of any crash of the downloader, set your email in "downl
 
 ## Requirements
 
-I use this application with Python 3.4. It requires ImageMagick to create the thumbnails on the web site. If you don't have "convert" in your path, please add it before launching the downloader.
+I use this application with python 3.4. It requires ImageMagick to create the thumbnails on the web site. If you don't have "convert" in your path, please add it before launching the downloader.
 
 Depending on the plugin, you could need other applications. See the plugin's header for more information.
 
@@ -37,5 +37,5 @@ Depending on the plugin, you could need other applications. See the plugin's hea
 
 If you want to develop new plugins for your subscriptions, you can take a look at the existing plugins in "available_plugins/" or in "nd/newspaper_api.py" to understand which class you must extend to create your own plugin.
 
-If you want to add new functionalities, send me a pull request! I would be happy to work with other people on this project.
+If you want to add new functionalitites, send me a pull request! I would be happy to work with other people on this project.
 
