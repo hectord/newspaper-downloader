@@ -4,6 +4,7 @@ import nd.plugin_utils
 import nd.scheduler
 import nd.newspaper_loader
 import nd.sender
+import nd.config
 
 import sqlite3
 
@@ -12,15 +13,14 @@ locale.setlocale(locale.LC_ALL, 'fr_CH.utf-8')
 
 from argparse import ArgumentParser
 
-GMAIL_EMAIL = ''
-GMAIL_PASSWORD = ''
-
 # the options available
 parser = ArgumentParser(description='Newspaper downloader')
 parser.add_argument("-l", "--logs", type=str, default="downloader.log", help="The log file to be used")
 parser.add_argument("-d", "--db", type=str, default="newspapers", help="The database used to store metadata")
 
 parser.add_argument("-e", "--email", nargs=1, dest="email", help="The mail to which the newspapers must be sent")
+
+parser.add_argument("-c", "--config", nargs=1, default="config.cfg", dest="config", help="The configuration file")
 
 parser.add_argument("-p", "--plugins", nargs='+', default=None, dest="plugins", type=str, help="Use a subset of the available plugins")
 
@@ -33,6 +33,17 @@ logHandler = logging.handlers.RotatingFileHandler(options.logs, maxBytes=1024*10
 formatter = logging.Formatter('%(levelname)s:%(asctime)s: %(message)s', datefmt='%d.%m.%Y %H:%M')
 logHandler.setFormatter(formatter)
 logger.addHandler(logHandler)
+
+try:
+  config = nd.config.Configuration()
+  config_file = open(options.config)
+  config.load(config_file)
+except (IOError, OSError, nd.config.ConfigurationException) as e:
+  logger.critical(e)
+  sys.exit(1)
+
+GMAIL_EMAIL = config.get("nd.downloader.log.email")
+GMAIL_PASSWORD = config.get("nd.downloader.log.password")
 
 # add a email handler (only for critical errors)
 if GMAIL_EMAIL and GMAIL_PASSWORD:
@@ -51,7 +62,7 @@ imported_plugins = nd.plugin_utils.load_plugins()
 newspapers = []
 for imported_plugin in imported_plugins:
   try:
-    plugin = imported_plugin()
+    plugin = imported_plugin(config)
     logger.info("Found newspaper loader for '%s'", plugin.name())
     newspapers.append(plugin)
   except Exception as e:

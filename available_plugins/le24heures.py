@@ -22,9 +22,6 @@ RE_SEARCH_PDF =  r'<option (selected="selected" )?value="\d{8}">(?P<d>\d{2})\.(?
 
 DOWNLOAD_PAGE = '/Products/VQH-{edition_type}/{date}/zip/full.zip'
 
-USERNAME = ''
-PASSWORD = ''
-
 # pdfconcat can be found here: http://pts-mini-gpl.googlecode.com/svn/trunk/pdfconcat/
 #  you can compile it with gcc.
 PDFCONCAT_PATH = 'pdfconcat'
@@ -84,8 +81,9 @@ class Le24HeuresNetAccess(object):
 
 class Le24HeuresLoader(NewspaperLoader):
 
-  def __init__(self, netaccess=Le24HeuresNetAccess()):
+  def __init__(self, config, netaccess=Le24HeuresNetAccess()):
     self._netaccess = netaccess
+    self._config = config
     self._opener = None
 
   def get_scheduler(self):
@@ -105,6 +103,12 @@ class Le24HeuresLoader(NewspaperLoader):
 
     self._opener = None
     try:
+      USERNAME = self._config["nd.plugin.24heures.username"]
+      PASSWORD = self._config["nd.plugin.24heures.password"]
+
+      if not USERNAME:
+        raise LoaderException('Invalid username')
+
       self._opener = self._netaccess.login(USERNAME, PASSWORD)
 
       logger = logging.getLogger(__name__)

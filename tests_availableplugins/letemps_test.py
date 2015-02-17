@@ -8,12 +8,17 @@ import urllib
 
 class LeTempsLoaderTest(unittest.TestCase):
 
+  def setUp(self):
+    self._config = mock()
+    when(self._config).get('nd.plugin.letemps.username').thenReturn('a')
+    when(self._config).get('nd.plugin.letemps.password').thenReturn('b')
+
   def testName(self):
-    l = LeTempsLoader()
+    l = LeTempsLoader(self._config)
     self.assertEquals(l.name(), 'Le Temps')
 
   def testGetIssuesWithoutLogin(self):
-    l = LeTempsLoader()
+    l = LeTempsLoader(self._config)
     try:
       l.issues()
       self.fail("No exception raised")
@@ -22,8 +27,8 @@ class LeTempsLoaderTest(unittest.TestCase):
 
   def testExceptionWhenLogin(self):
     networkAccess = mock()
-    when(networkAccess).login(USERNAME, PASSWORD).thenRaise(urllib.request.URLError(''))
-    l = LeTempsLoader(networkAccess)
+    when(networkAccess).login('a', 'b').thenRaise(urllib.request.URLError(''))
+    l = LeTempsLoader(self._config, networkAccess)
     try:
       l.init()
       self.fail("No exception raised")
@@ -31,7 +36,7 @@ class LeTempsLoaderTest(unittest.TestCase):
       pass
 
     error = urllib.request.HTTPError(*[None for i in range(5)])
-    when(networkAccess).login(USERNAME, PASSWORD).thenRaise(error)
+    when(networkAccess).login('a', 'b').thenRaise(error)
     try:
       l.init()
       self.fail("No exception raised")
@@ -41,10 +46,10 @@ class LeTempsLoaderTest(unittest.TestCase):
   def testExceptionWhenFindIssues(self):
     networkAccess = mock()
     opener = mock()
-    when(networkAccess).login(USERNAME, PASSWORD).thenReturn(opener)
+    when(networkAccess).login("a", "b").thenReturn(opener)
     when(networkAccess).issues_page(opener).thenRaise(urllib.request.URLError(''))
 
-    l = LeTempsLoader(networkAccess)
+    l = LeTempsLoader(self._config, networkAccess)
     l.init()
     try:
       l.issues()
@@ -54,7 +59,7 @@ class LeTempsLoaderTest(unittest.TestCase):
 
     error = urllib.request.HTTPError(*[None for i in range(5)])
     when(networkAccess).issues_page(opener).thenRaise(error)
-    l = LeTempsLoader(networkAccess)
+    l = LeTempsLoader(self._config, networkAccess)
     l.init()
     try:
       l.issues()
@@ -81,10 +86,10 @@ class LeTempsLoaderTest(unittest.TestCase):
     htmlSrc += u'<li><a href="http://letemps.ch/rw/30914.pdf" onclick="">Version PDF</a></li>'
 
     networkAccess = mock()
-    when(networkAccess).login(USERNAME, PASSWORD).thenReturn(1)
+    when(networkAccess).login('a', 'b').thenReturn(1)
     when(networkAccess).issues_page(1).thenReturn(htmlSrc)
 
-    l = LeTempsLoader(networkAccess)
+    l = LeTempsLoader(self._config, networkAccess)
     l.init()
     issues = l.issues()
 
@@ -103,10 +108,10 @@ class LeTempsLoaderTest(unittest.TestCase):
     htmlSrc += '<li><a href="http://letemps.ch/rw/30914.pdf" onclick="">Version PDF</a></li>'
 
     networkAccess = mock()
-    when(networkAccess).login(USERNAME, PASSWORD).thenReturn(1)
+    when(networkAccess).login('a', 'b').thenReturn(1)
     when(networkAccess).issues_page(1).thenReturn(htmlSrc)
 
-    l = LeTempsLoader(networkAccess)
+    l = LeTempsLoader(self._config, networkAccess)
     l.init()
     issues = l.issues()
 

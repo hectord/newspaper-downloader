@@ -10,9 +10,6 @@ URL_BASE = 'http://www.letemps.ch/'
 LOGIN_PAGE = '/Login'
 LIST_PAGE = '/e_paper?periodMin=1m'
 
-USERNAME = ''
-PASSWORD = ''
-
 RE_SEARCH_PDF =  r'<div class="previewBox">\s*<div class="background">\s*<div class="heading">(?P<title>.*?)</div>\s*'
 RE_SEARCH_PDF += r'<div class="content">\s*<h3><a href="[^\"]*">(?P<date>[0-9.]+)</a></h3>\s*'
 RE_SEARCH_PDF += r'<div class="preview">\s*<a href="[^\"]*"><img [^>]*></a></div>\s*'
@@ -59,8 +56,9 @@ class LeTempsLoaderNetAccess(object):
 
 class LeTempsLoader(NewspaperLoader):
 
-  def __init__(self, netaccess=LeTempsLoaderNetAccess()):
+  def __init__(self, config, netaccess=LeTempsLoaderNetAccess()):
     self._netaccess = netaccess
+    self._config = config
     self._opener = None
 
   def get_scheduler(self):
@@ -74,6 +72,12 @@ class LeTempsLoader(NewspaperLoader):
   def init(self):
     self._opener = None
     try:
+      USERNAME = self._config.get("nd.plugin.letemps.username")
+      PASSWORD = self._config.get("nd.plugin.letemps.password")
+
+      if not USERNAME:
+        raise LoaderException('Invalid username')
+
       self._opener = self._netaccess.login(USERNAME, PASSWORD)
 
       logger = logging.getLogger(__name__)
