@@ -103,8 +103,8 @@ class Le24HeuresLoader(NewspaperLoader):
 
     self._opener = None
     try:
-      USERNAME = self._config["nd.plugin.24heures.username"]
-      PASSWORD = self._config["nd.plugin.24heures.password"]
+      USERNAME = self._config.get("nd.plugin.24heures.username")
+      PASSWORD = self._config.get("nd.plugin.24heures.password")
 
       if not USERNAME:
         raise LoaderException('Invalid username')
@@ -235,6 +235,9 @@ class Le24HeuresIssue(OnlineNewspaperIssue):
       shutil.rmtree(pdfdir)
 
       return Le24HeuresStream(thepdf, self)
+
+    except zipfile.BadZipfile as e:
+      raise LoaderException('Invalid ZIP file')
     except urllib.request.HTTPError as e:
       raise LoaderException('HTTP error when downloading "%s" (HTTP code: %s)' % \
                           (self.title(), e.code))
