@@ -1,4 +1,4 @@
-# NewspaperDownloader
+# NewspaperDownloader [![Build Status](https://travis-ci.org/hectord/newspaper-downloader.svg)](http://travis-ci.org/hectord/newspaper-downloader)
 
 ND is a web site that unifies the way you download your newspapers.
 
@@ -9,6 +9,7 @@ It is made up of a worker, downlading every new issue as it comes out, and a web
 I have developed two plugins to download my (swiss) newspapers:
  * 24 heures
  * Le Temps
+ * Le Courrier International (it works in early 2015)
 
 You can use them if you have a valid subscription. Otherwise you can develop a new plugin to download your own newspaper on the platform.
 
