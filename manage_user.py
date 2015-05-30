@@ -18,15 +18,15 @@ if bool(options.delete_user) == bool(options.new_user):
 
 db_name = '%s.db' % options.db
 try:
-    ndb = sqlite3.connect(db_name)
-    db = nd.db.DB(ndb)
-    if options.new_user:
-        newpassword = getpass.getpass('Password:')
-        db.add_user(options.new_user, newpassword)
-        print("This user has been created/updated")
-    else:
-        db.delete_user(options.delete_user)
-        print("This user has been deleted")
+  ndb = sqlite3.connect(db_name)
+  db = nd.db.DB(ndb)
+  if options.new_user:
+    newpassword = getpass.getpass('Password:')
+    db.add_user(options.new_user, newpassword)
+    print("This user has been created/updated")
+  else:
+    db.delete_user(options.delete_user)
+    print("This user has been deleted")
 
 except (nd.db.DBException, sqlite3.DatabaseError) as e:
   print(e, file=sys.stderr)

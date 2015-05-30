@@ -84,10 +84,14 @@ db_name = '%s.db' % options.db
 db_folder = options.db
 try:
   ndb = sqlite3.connect(db_name)
-  newspaperDir = nd.sender.DirManager(db_folder)
+  try:
+    newspaperDir = nd.sender.DirManager(db_folder)
+  except IOError as e:
+    logger.error(str(e))
+    sys.exit(1)
+
   db = nd.db.DB(ndb)
   dbSender = nd.sender.DBSender(newspaperDir, db)
-
   senders = [dbSender]
   if options.email != None:
     senders.append(nd.sender.GMailSender(options.email))
@@ -96,9 +100,16 @@ try:
   for newspaper in newspapers:
     downloaders.append(nd.newspaper_loader.NewspaperDownloader(senders, newspaper))
 
+  import datetime
+  newspapers[0].init()
+  downloaders[0](datetime.date(2015, 5, 28))
+  sys.exit(1)
+
   nd.scheduler.download(downloaders)
+except nd.newspaper_api.LoaderException as e:
+  logger.error(e)
 except sqlite3.Error as e:
   logger.exception("Error when loading the database")
 except Exception as e:
-  logger.critical("Unknown exception" + str(e), exc_info=True)
+  logger.critical("Unknown exception " + str(e), exc_info=True)
 
