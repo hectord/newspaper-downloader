@@ -10,6 +10,7 @@ I have developed two plugins to download my (swiss) newspapers:
  * 24 heures
  * Le Temps
  * Le Courrier International (it works in early 2015)
+ * L'Hebdo
 
 You can use them if you have a valid subscription. Otherwise you can develop a new plugin to download your own newspaper on the platform.
 

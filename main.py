@@ -100,12 +100,8 @@ try:
   for newspaper in newspapers:
     downloaders.append(nd.newspaper_loader.NewspaperDownloader(senders, newspaper))
 
-  import datetime
-  newspapers[0].init()
-  downloaders[0](datetime.date(2015, 5, 28))
-  sys.exit(1)
-
   nd.scheduler.download(downloaders)
+
 except nd.newspaper_api.LoaderException as e:
   logger.error(e)
 except sqlite3.Error as e:

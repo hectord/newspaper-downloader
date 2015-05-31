@@ -9,120 +9,120 @@ import io
 from mockito import *
 
 class NewspaperDownloaderTest(unittest.TestCase):
-  
-  def testConstructor(self):
-    try:
-      NewspaperDownloader(None, None)
-      self.fail("No exception raised")
-    except ValueError:
-      pass
 
-  def testNoFileFound(self):
-    sender = mock()
+    def testConstructor(self):
+        try:
+            NewspaperDownloader(None, None)
+            self.fail("No exception raised")
+        except ValueError:
+            pass
 
-    repo, file = mock(), mock()
-    when(repo).mkstemp().thenReturn(file)
+    def testNoFileFound(self):
+        sender = mock()
 
-    newspaper = mock()
-    when(newspaper).issues().thenReturn([])
+        repo, file = mock(), mock()
+        when(repo).mkstemp().thenReturn(file)
 
-    d = NewspaperDownloader(sender, newspaper, repo)
-    today = datetime.date(2013, 12, 14)
+        newspaper = mock()
+        when(newspaper).issues().thenReturn([])
 
-    ok = d(today)
-    self.assertEquals(ok, False)
+        d = NewspaperDownloader(sender, newspaper, repo)
+        today = datetime.date(2013, 12, 14)
 
-  def testDownloadFile(self):
-    sender = mock()
+        ok = d(today)
+        self.assertEquals(ok, False)
 
-    repo, file = mock(), mock()
-    when(repo).mkstemp().thenReturn(file)
-    when(file).close().thenRaise(Exception)
+    def testDownloadFile(self):
+        sender = mock()
 
-    today = datetime.date(2013, 12, 14)
+        repo, file = mock(), mock()
+        when(repo).mkstemp().thenReturn(file)
+        when(file).close().thenRaise(Exception)
 
-    issue = mock()
-    when(issue).date().thenReturn(today)
-    when(issue).open().thenReturn(io.StringIO('hihi'))
+        today = datetime.date(2013, 12, 14)
 
-    newspaper = mock()
-    when(newspaper).issues().thenReturn([issue])
+        issue = mock()
+        when(issue).date().thenReturn(today)
+        when(issue).open().thenReturn(io.StringIO('hihi'))
 
-    d = NewspaperDownloader(sender, newspaper, repo)
+        newspaper = mock()
+        when(newspaper).issues().thenReturn([issue])
 
-    isOk = d(today)
-    self.assertEquals(isOk, True)
+        d = NewspaperDownloader(sender, newspaper, repo)
 
-    inorder.verify(file).write('hihi')
-    inorder.verify(file).seek(0)
-    inorder.verify(sender).upload_PDF(issue, file)
-    inorder.verify(file).close()
+        isOk = d(today)
+        self.assertEquals(isOk, True)
 
-  def testLoaderExcepion(self):
-    sender = mock()
+        inorder.verify(file).write('hihi')
+        inorder.verify(file).seek(0)
+        inorder.verify(sender).upload_PDF(issue, file)
+        inorder.verify(file).close()
 
-    today = datetime.date(2013, 12, 14)
+    def testLoaderExcepion(self):
+        sender = mock()
 
-    newspaper = mock()
-    when(newspaper).init().thenRaise(LoaderException(''))
-    when(sender).is_critical().thenReturn(False)
+        today = datetime.date(2013, 12, 14)
 
-    d = NewspaperDownloader(sender, newspaper)
-    isOk = d(today)
-    self.assertEquals(isOk, True)
+        newspaper = mock()
+        when(newspaper).init().thenRaise(LoaderException(''))
+        when(sender).is_critical().thenReturn(False)
 
-    when(sender).is_critical().thenReturn(True)
-    isOk = d(today)
-    self.assertEquals(isOk, False)
+        d = NewspaperDownloader(sender, newspaper)
+        isOk = d(today)
+        self.assertEquals(isOk, True)
 
-  def testSenderExcepion(self):
-    sender = mock()
-    today = datetime.date(2013, 12, 14)
+        when(sender).is_critical().thenReturn(True)
+        isOk = d(today)
+        self.assertEquals(isOk, False)
 
-    repo, file = mock(), mock()
-    when(repo).mkstemp().thenReturn(file)
+    def testSenderExcepion(self):
+        sender = mock()
+        today = datetime.date(2013, 12, 14)
 
-    issue = mock()
-    when(issue).date().thenReturn(today)
-    when(issue).open().thenReturn(file)
+        repo, file = mock(), mock()
+        when(repo).mkstemp().thenReturn(file)
 
-    newspaper = mock()
-    when(newspaper).issues().thenReturn([issue])
-    
-    when(sender).upload_PDF(issue, any()).thenRaise(SenderException)
+        issue = mock()
+        when(issue).date().thenReturn(today)
+        when(issue).open().thenReturn(file)
 
-    d = NewspaperDownloader(sender, newspaper, repo)
+        newspaper = mock()
+        when(newspaper).issues().thenReturn([issue])
 
-    when(sender).is_critical().thenReturn(True)
-    isOk = d(today)
-    self.assertEquals(isOk, False)
+        when(sender).upload_PDF(issue, any()).thenRaise(SenderException)
 
-    when(sender).is_critical().thenReturn(False)
-    isOk = d(today)
-    self.assertEquals(isOk, True)
+        d = NewspaperDownloader(sender, newspaper, repo)
 
-  def testIOError(self):
-    sender = mock()
+        when(sender).is_critical().thenReturn(True)
+        isOk = d(today)
+        self.assertEquals(isOk, False)
 
-    repo= mock()
-    when(repo).mkstemp().thenRaise(IOError)
+        when(sender).is_critical().thenReturn(False)
+        isOk = d(today)
+        self.assertEquals(isOk, True)
 
-    today = datetime.date(2013, 12, 14)
+    def testIOError(self):
+        sender = mock()
 
-    issue = mock()
-    when(issue).date().thenReturn(today)
+        repo= mock()
+        when(repo).mkstemp().thenRaise(IOError)
 
-    newspaper = mock()
-    when(newspaper).issues().thenReturn([issue])
+        today = datetime.date(2013, 12, 14)
 
-    d = NewspaperDownloader(sender, newspaper, repo)
+        issue = mock()
+        when(issue).date().thenReturn(today)
 
-    when(sender).is_critical().thenReturn(True)
-    isOk = d(today)
-    self.assertEquals(isOk, False)
+        newspaper = mock()
+        when(newspaper).issues().thenReturn([issue])
 
-    when(repo).mkstemp().thenRaise(Exception)
-    when(sender).is_critical().thenReturn(False)
-    isOk = d(today)
-    self.assertEquals(isOk, True)
+        d = NewspaperDownloader(sender, newspaper, repo)
+
+        when(sender).is_critical().thenReturn(True)
+        isOk = d(today)
+        self.assertEquals(isOk, False)
+
+        when(repo).mkstemp().thenRaise(Exception)
+        when(sender).is_critical().thenReturn(False)
+        isOk = d(today)
+        self.assertEquals(isOk, True)
 

@@ -35,128 +35,128 @@ logger.addHandler(logHandler)
 LOGGED_IN_COOKIE = "logged-in"
 LOGGED_IN_AS = "logged-as"
 def check_auth_or_redirect(db):
-  username = request.get_cookie(LOGGED_IN_AS)
+    username = request.get_cookie(LOGGED_IN_AS)
 
-  hash = db.check_auth(username)
-  if hash != None:
-    if request.get_cookie(LOGGED_IN_COOKIE, secret=hash) == "1":
-      return
+    hash = db.check_auth(username)
+    if hash != None:
+        if request.get_cookie(LOGGED_IN_COOKIE, secret=hash) == "1":
+            return
 
-  username = 'someone' if username == None else username
-  logger.warning('Intrusion tried by %s [%s]',
-                 username, request.remote_addr)
-  redirect('/login')
+    username = 'someone' if username == None else username
+    logger.warning('Intrusion tried by %s [%s]',
+                   username, request.remote_addr)
+    redirect('/login')
 
 @app.route('/')
 def index():
-  redirect('/login')
+    redirect('/login')
 
 @app.route('/login', method="ANY")
 def login(db):
-  db = nd.db.DB(db)
-  loginError = False
-  ret = dict(path=request.urlparts.path,
-             loginError=False,
-             name='NPs')
+    db = nd.db.DB(db)
+    loginError = False
+    ret = dict(path=request.urlparts.path,
+               loginError=False,
+               name='NPs')
 
-  if 'username' in request.forms:
-    username = request.forms.get('username') or ''
-    ret['username'] = username
-    password = request.forms.get('password') or ''
+    if 'username' in request.forms:
+        username = request.forms.get('username') or ''
+        ret['username'] = username
+        password = request.forms.get('password') or ''
 
-    hash = db.check_auth(username, password)
-    if hash != None:
-      response.set_cookie(LOGGED_IN_AS, username, max_age=3600)
-      response.set_cookie(LOGGED_IN_COOKIE, "1", secret=hash, max_age=3600)
-      logger.info('User %s logged in successfully [%s]',
-                  username, request.remote_addr)
-      redirect('/newspapers/')
-    else:
-      logger.warning('Bad credentials given by %s [%s]',
-                    username, request.remote_addr)
-      ret['loginError'] = True
+        hash = db.check_auth(username, password)
+        if hash != None:
+            response.set_cookie(LOGGED_IN_AS, username, max_age=3600)
+            response.set_cookie(LOGGED_IN_COOKIE, "1", secret=hash, max_age=3600)
+            logger.info('User %s logged in successfully [%s]',
+                        username, request.remote_addr)
+            redirect('/newspapers/')
+        else:
+            logger.warning('Bad credentials given by %s [%s]',
+                           username, request.remote_addr)
+            ret['loginError'] = True
 
-  return template('login.tpl', ret)
+    return template('login.tpl', ret)
 
 @app.route('/logout')
 def logout():
-  username = request.get_cookie(LOGGED_IN_AS)
-  logger.info('User %s logs out', username)
-  response.delete_cookie(LOGGED_IN_AS)
-  response.delete_cookie(LOGGED_IN_COOKIE)
-  redirect('/login')
+    username = request.get_cookie(LOGGED_IN_AS)
+    logger.info('User %s logs out', username)
+    response.delete_cookie(LOGGED_IN_AS)
+    response.delete_cookie(LOGGED_IN_COOKIE)
+    redirect('/login')
 
 @app.route('/newspapers/<name:re:.*>')
 def newspapers(name, db):
-  db = nd.db.DB(db)
+    db = nd.db.DB(db)
 
-  display = request.query.display or 'list'
-  check_auth_or_redirect(db)
+    display = request.query.display or 'list'
+    check_auth_or_redirect(db)
 
-  from_np_no = request.query.from_np or '0'
-  if from_np_no != None and from_np_no.isdigit():
-    from_np_no = int(from_np_no)
+    from_np_no = request.query.from_np or '0'
+    if from_np_no != None and from_np_no.isdigit():
+        from_np_no = int(from_np_no)
 
-  name = name if name != '' else None
-  from_nb = (from_np_no, NB_NEWSPAPERS_PER_PAGE+1)
-  issues = db.issues(name, from_nb=from_nb)
+    name = name if name != '' else None
+    from_nb = (from_np_no, NB_NEWSPAPERS_PER_PAGE+1)
+    issues = db.issues(name, from_nb=from_nb)
 
-  previous = max(from_np_no-NB_NEWSPAPERS_PER_PAGE, 0)
-  if previous == from_np_no:
-    previous = None
+    previous = max(from_np_no-NB_NEWSPAPERS_PER_PAGE, 0)
+    if previous == from_np_no:
+        previous = None
 
-  next = from_np_no+NB_NEWSPAPERS_PER_PAGE
-  if len(issues) <= NB_NEWSPAPERS_PER_PAGE:
-    next = None
-  else:
-    issues = issues[:-1]
+    next = from_np_no+NB_NEWSPAPERS_PER_PAGE
+    if len(issues) <= NB_NEWSPAPERS_PER_PAGE:
+        next = None
+    else:
+        issues = issues[:-1]
 
-  return template('newspapers.tpl',
-                  dict(issues=issues,
-                       newspapers=db.newspapers(),
-                       current_newspaper=name,
-                       path=request.urlparts.path,
-                       display=display,
-                       other_page_numbers=(previous,next),
-                       current_page=from_np_no))
+    return template('newspapers.tpl',
+                    dict(issues=issues,
+                         newspapers=db.newspapers(),
+                         current_newspaper=name,
+                         path=request.urlparts.path,
+                         display=display,
+                         other_page_numbers=(previous,next),
+                         current_page=from_np_no))
 
 @app.route('/thumbnail/<id:re:\d+>')
 def thumbnail(id, db):
-  db = nd.db.DB(db)
+    db = nd.db.DB(db)
 
-  check_auth_or_redirect(db)
-  issues = db.issues(id=id)
+    check_auth_or_redirect(db)
+    issues = db.issues(id=id)
 
-  if issues and issues[0].thumbnail_path():
-    thpath = os.path.join(db_folder, issues[0].thumbnail_path())
-    if os.path.isfile(thpath):
-      return static_file(issues[0].thumbnail_path(), root=db_folder)
-    else:
-      return static_file('no_thumbnail.png', root='static')
+    if issues and issues[0].thumbnail_path():
+        thpath = os.path.join(db_folder, issues[0].thumbnail_path())
+        if os.path.isfile(thpath):
+            return static_file(issues[0].thumbnail_path(), root=db_folder)
+        else:
+            return static_file('no_thumbnail.png', root='static')
 
 @app.route('/issue/<id:re:\d+>')
 def newspaper(id, db):
-  db = nd.db.DB(db)
-  check_auth_or_redirect(db)
-  username = request.get_cookie(LOGGED_IN_AS)
+    db = nd.db.DB(db)
+    check_auth_or_redirect(db)
+    username = request.get_cookie(LOGGED_IN_AS)
 
-  issues = db.issues(id=id)
-  if not issues:
-    logger.error('Invalid newspaper pointed by "%s" [%s]',
-                 request.fullpath, request.remote_addr)
-    redirect('/newspapers/')
-  else:
-    issue = issues[0]
-    logger.info('User %s downloads %s [%s]',
-                username, issue, request.remote_addr)
-    filename = '%s %s.pdf' % (issue.title(), issue.date())
-    return static_file(issue.path(), root=db_folder, 
-                       download=filename, 
-                       mimetype='application/pdf')
+    issues = db.issues(id=id)
+    if not issues:
+        logger.error('Invalid newspaper pointed by "%s" [%s]',
+                     request.fullpath, request.remote_addr)
+        redirect('/newspapers/')
+    else:
+        issue = issues[0]
+        logger.info('User %s downloads %s [%s]',
+                    username, issue, request.remote_addr)
+        filename = '%s %s.pdf' % (issue.title(), issue.date())
+        return static_file(issue.path(), root=db_folder,
+                           download=filename,
+                           mimetype='application/pdf')
 
 @app.route('/static/<filename:re:.+>')
 def static(filename):
-  return static_file(filename, root='static')
+    return static_file(filename, root='static')
 
 run(app, server='cherrypy', host='0.0.0.0', port=8080)
 
